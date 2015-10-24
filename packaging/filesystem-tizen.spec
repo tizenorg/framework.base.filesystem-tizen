@@ -3,13 +3,14 @@ Summary: The basic directory layout for Tizen system
 Name: filesystem-tizen
 Version: 0.0.1
 Release: 1
-License: Apache License v2
+License: Apache-2.0
 Group: System/Base
 BuildArch: noarch
 Source0: %{name}-%{version}.tar.gz
 Source1: issue
 Source2: issue.net
 Source1001: filesystem-tizen.manifest
+Source1002: LICENSE.Apache-2.0 
 Requires(post): coreutils
 Requires(post): filesystem
 
@@ -37,11 +38,12 @@ mkdir %{buildroot}
 cd %{buildroot}
 mkdir -p csa mnt \
     etc/{rc.d/init.d,ssl} \
-    lib/modules \
-    opt/{data,driver,home/{app,developer},share/icons/default/small,storage/{sdcard,PersonalStorage},usr/{apps,data,dbspace,devel/{bin,sbin,usr/{bin,sbin}},live,media,share,ug,.personalpage},var/{cache,lib,log/apt}} \
+    opt/{data,driver,home/{app,developer,system},share/icons/default/small,storage/{sdcard,PersonalStorage},usr/{apps,data,dbspace,devel/{bin,sbin,usr/{bin,sbin}},live,media,share,ug,.personalpage},var/{cache,lib,log/apt}} \
     usr/{apps,lib/{debug,locale},share/icons/default/small,ug}
 
-ln -sf /opt/home home
+mkdir -p %{buildroot}/usr/share/license
+install -m 0644 %SOURCE1002 %{buildroot}/usr/share/license/%{name}
+
 ln -sf /mnt/mmc sdcard
 ln -sf /opt/storage/sdcard mnt/mmc
 ln -sf /opt/media mnt/ums
@@ -55,6 +57,8 @@ ln -sf usr/ug opt/ug
 install -m644 %SOURCE1 %SOURCE2 etc
 
 %post
+rm -rf home
+ln -sf /opt/home home
 [ -d /opt/home ] || mkdir -p /opt/home
 if [ -d /root ]; then
 # mv can't work because when creating image, / and /opt are different device
@@ -70,22 +74,19 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
+/usr/share/license/%{name}
 %manifest filesystem-tizen.manifest
 /csa
-%dir /lib/modules
 %dir /mnt
 /mnt/mmc
 /mnt/ums
 /sdcard
 %dir /usr
 /usr/apps
-%dir /usr/lib
 /usr/lib/debug
-/usr/lib/locale/
 %dir /usr/share/icons/default
 /usr/share/icons/default/small
 /usr/ug
-/home
 %dir /etc
 /etc/init.d
 /etc/rc.d/init.d/
@@ -114,6 +115,7 @@ rm -rf %{buildroot}
 %dir /opt/home
 /opt/home/app
 /opt/home/developer
+/opt/home/system
 %dir /opt/share/icons/default
 /opt/share/icons/default/small
 %dir /opt/storage
